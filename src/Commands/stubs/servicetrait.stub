@@ -1,0 +1,145 @@
+<?php 
+
+namespace DummyNamespace;
+
+/**
+ * Class DummyClass
+ *
+ * @package DummyNamespace
+ */
+Trait DummyClass
+{
+	/**
+	 * 验证产品并返回，默认不能为空
+	 * @param  [type]  $key     [description]
+	 * @param  [type]  $default [description]
+	 * @param  boolean $bool    [description]
+	 * @return [type]           [description]
+	 */
+	public function checkParam($key, $default = '', $bool = true)
+	{
+		$val = request($key);
+
+		if($bool) {
+			if(!$val) {
+				throw new Exception("参数不能为空", 2);
+			}
+		} else {
+			$val = $val || $val === '0' ? $val : $default;
+		}
+
+		return $val;
+	}
+
+	public function checkParamValue($val, $default, $bool = true)
+	{
+		if($bool) {
+			if(!$val) {
+				throw new Exception("参数不能为空", 2);
+			}
+		} else {
+			$val = $val ?: $default;
+		}
+
+		return $val;
+	}
+
+	/**
+	 * 获取请求中的参数的值
+	 * @param  array  $fields [description]
+	 * @return [type]         [description]
+	 */
+	public function searchArray($fields=[])
+	{
+		$results = [];
+		if (is_array($fields)) {
+			foreach($fields as $field => $operator) {
+				$isFilter = true;
+				/*传递的值*/
+				$value = request()->has($field) ? $this->checkParam($field, '', false) : '';
+
+				/*默认值*/
+				if( is_array($operator) ) {
+					/*初始化的值*/
+					$init = isset($operator['init']) ? $operator['init'] : '';
+					$value = $value ?: $init;
+					
+					$setOperator = $operator['operator'] ?: '=';
+					/*默认值*/
+					$defaultValue = isset($operator['default']) && $operator['default'] ? $operator['default'] : '';
+					$setValue = $defaultValue ?: $value;
+					$setEncrypt = isset($operator['encrypt']) ? $operator['encrypt'] : '';
+					$isFilter = isset($operator['filter']) ? $operator['filter'] : true;
+
+					/*处理值是否加密*/
+					if( !$defaultValue ) {
+						$setValue = $setEncrypt ? $setEncrypt->decodeId($setValue) : $setValue;
+					}
+				} else {
+					$setOperator = $operator;
+					$setValue = $value;
+				}
+
+				/*不过滤空值 或者 有值*/
+				if( !$isFilter || $setValue ) {
+					$results[$field] = $this->getSearchResult($field, $setOperator, $setValue);
+				}
+			}
+		}
+
+		return $results;
+	}
+
+	private function getSearchResult($field, $operator, $value)
+	{	
+		switch( $operator ) {
+			case 'like' :
+				$result = [$field, $operator, "%{$value}%"];
+				break;
+			default :
+				$result = [$field, $operator, $value];
+				break;
+		}
+
+		return $result;
+	}
+
+	public function setBetweenValue($operator)
+	{
+		$setValue = [];
+
+		$startField = $operator['start'];
+		$endField = $operator['end'];
+
+		$startValue = request($startField, '');
+		$endValue = request($endField, '');
+
+		if( $startValue && $endValue ) {
+			$setValue = [
+				$startValue, $endValue
+			];
+		}
+
+		return $setValue;
+	}
+
+	/**
+	 * 清除菜单缓存
+	 * @return [type] [description]
+	 */
+	public function clearCache()
+	{
+		Artisan::call('cache:clear');
+	}
+
+	/**
+	 * 设置缓存
+	 * @param  [type] $key      [description]
+	 * @param  [type] $function [description]
+	 * @return [type]           [description]
+	 */
+	public function setCache($key, $function)
+	{
+		return Cache::rememberForever($key, $function);
+	}
+}

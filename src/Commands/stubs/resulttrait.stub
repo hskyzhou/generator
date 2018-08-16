@@ -1,0 +1,23 @@
+<?php 
+
+namespace DummyNamespace;
+
+/**
+ * Class DummyClass
+ *
+ * @package DummyNamespace
+ */
+Trait DummyClass
+{
+	/**
+	 * status 状态码, 跟http状态一致
+	 * data   成功是返回结果
+	 * message 失败时返回结果
+	 * @var [type]
+	 */
+	protected $results = [
+		'status' => '200',
+		'data' => [],
+		'message' => '',
+	];
+}

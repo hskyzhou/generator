@@ -1,0 +1,19 @@
+<?php 
+
+namespace DummyNamespace;
+
+use App\Services\Service;
+use Exception;
+use DB;
+use App\Traits\ResultTrait;
+use App\Traits\ServiceTrait;
+
+/**
+ * Class DummyClass.
+ *
+ * @package DummyNamespace
+ */
+class DummyClass extends Service
+{
+	use ServiceTrait, ResultTrait;
+}

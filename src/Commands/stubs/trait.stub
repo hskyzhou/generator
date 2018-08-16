@@ -1,0 +1,13 @@
+<?php 
+
+namespace DummyNamespace;
+
+/**
+ * Class DummyClass
+ *
+ * @package DummyNamespace
+ */
+Trait DummyClass
+{
+
+}

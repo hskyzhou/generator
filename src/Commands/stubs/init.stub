@@ -1,0 +1,16 @@
+<?php 
+
+namespace DummyNamespace;
+
+/**
+ * Class Service.
+ *
+ * @package DummyNamespace
+ */
+class DummyClass
+{
+	public function __construct()
+	{
+
+	}
+}
