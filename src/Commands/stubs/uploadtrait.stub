@@ -1,0 +1,107 @@
+<?php 
+
+namespace DummyNamespace;
+
+use Exception;
+
+/**
+ * Class DummyClass
+ *
+ * @package DummyNamespace
+ */
+Trait DummyClass
+{
+	protected $uploadDisk = 'local';
+
+	/**
+	 * 上传文件
+	 * @param  string $key         [前端传递的key]
+	 * @param  array  $uploadTypes [允许上传的类型]
+	 * @return [type]              [description]
+	 */
+	public function uploadPublic($key = 'file', $dir = 'attachments', $uploadFileTypes = [])
+	{
+		return $this->upload($key, $dir, $uploadFileTypes, 'public');
+	}
+
+	/**
+	 * 上传文件
+	 * @param  [type] $key             [description]
+	 * @param  [type] $dir             [description]
+	 * @param  [type] $uploadFileTypes [description]
+	 * @param  string $disk            [description]
+	 * @return [type]                  [description]
+	 */
+	public function upload($key, $dir, $uploadFileTypes, $disk = '')
+	{
+		/*判断是否有文件*/
+		if ( !request()->hasFile($key) ) {
+			throw new Exception('请选择上传的文件', 2);
+		}
+
+		$file = request()->file($key);
+
+
+		if ($uploadFileTypes) {
+			$extension = $file->getClientOriginalExtension();
+
+			if (!in_array($extension, $uploadFileTypes)) {
+				throw new Exception("非法上传文件类型", 2);
+			}
+		}
+
+		/*上传文件路径*/
+		$disk = $disk ?: $this->uploadDisk;
+		return $file->store($dir, $disk);
+	}
+
+	/**
+	 * 获取当前登录用户
+	 * @return [type] [description]
+	 */
+	protected function getCurrentUser()
+	{
+		$user = getUser();
+		return [
+			'user_id' => $user && isset($user['uuid']) ? $user['uuid'] : '',
+			'user_name' => '',
+		];
+	}
+
+	/**
+	 * 附件记录入库
+	 * @param  [type] $path [description]
+	 * @param  [type] $file [description]
+	 * @return [type]       [description]
+	 */
+	protected function attachmentStore($path, $file)
+	{
+		/*上传者信息*/
+		$userData = $this->getCurrentUser();
+
+	    $data = [
+	    	'name' => $file->hashName(),
+	    	'origin_name' => $file->getClientOriginalName(),
+	    	'file_size' => $file->getClientSize(),
+	    	'path' => $path,
+	    	'file_ext' => $file->getClientOriginalExtension(),
+	    	'ext_info' => '',
+	    ];
+
+	    $data = array_merge($data, $userData);
+
+	    /*新增附件信息*/
+	    if( !$attachment = $this->attachmentRepo->create($data) ) {
+			throw new Exception("上传附件失败", 2);
+	    }
+
+    	return [
+    		'id_hash' => $attachment->id_hash,
+    		'name' => str_replace('.' . $attachment->file_ext, '', $attachment->origin_name),
+    		'file_ext' => $attachment->file_ext,
+    		'file_size' => $attachment->file_size,
+    		'url' => route('admin.attachment.show', [$attachment->id_hash]),
+    		'created_at' => $attachment->created_at->format('Y-m-d H:i:s')
+    	];
+	}
+}

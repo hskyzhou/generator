@@ -72,5 +72,25 @@ class InitCommand extends GeneratorCommand
         $this->type = 'init ServiceTrait';
         parent::handle();
 
+        $this->stub = __DIR__.'/stubs/repositorytrait.stub';
+        $this->nameInput = config('hskygenerator.path.traits') . '/RepositoryTrait';
+        $this->type = 'init RepositoryTrait';
+        parent::handle();
+
+        $this->stub = __DIR__.'/stubs/redistrait.stub';
+        $this->nameInput = config('hskygenerator.path.traits') . '/RedisTrait';
+        $this->type = 'init RedisTrait';
+        parent::handle();
+
+        $this->stub = __DIR__.'/stubs/searchtrait.stub';
+        $this->nameInput = config('hskygenerator.path.traits') . '/SearchTrait';
+        $this->type = 'init SearchTrait';
+        parent::handle();
+
+        $this->stub = __DIR__.'/stubs/uploadtrait.stub';
+        $this->nameInput = config('hskygenerator.path.traits') . '/UploadTrait';
+        $this->type = 'init UploadTrait';
+        parent::handle();
+
     }
 }

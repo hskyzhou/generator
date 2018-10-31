@@ -1,0 +1,59 @@
+<?php 
+
+namespace DummyNamespace;
+
+use PhpRedis;
+
+/**
+ * Class DummyClass
+ *
+ * @package DummyNamespace
+ */
+Trait DummyClass
+{
+	public function redisGetSet($key, $function, $default = '')
+	{	
+		if (PhpRedis::command('EXISTS', [$key])) {
+			$redisValues = PhpRedis::command('GET', [$key]);
+			
+			/*json转数组*/
+			$values = json_decode($redisValues, true);
+			
+			$values = json_last_error() == JSON_ERROR_NONE ? $values : $redisValues;
+		} else {
+			/*获取数据*/
+			$values = $function();
+			/*是否为空*/
+			$values = $values ?: $default;
+			/*数组直接转json*/
+			$jsonValues = is_array($values) ? json_encode($values) : $values;
+
+			PhpRedis::command('SET', [$key, $jsonValues]);
+		}
+
+		return $values;
+	}
+
+	public function clearRedisAll()
+	{
+		$this->clearRedisKey(config('back.global.prefix'));
+	}
+
+	public function clearRedisKeys($keys = [])
+	{
+		if ($keys) {
+			foreach ($keys as $key) {
+				$tmpKey = getKeyByPrefix([$key], config('back.rediskey.delimiter'));
+				$this->clearRedisKey($tmpKey);
+			}
+		}
+	}
+	public function clearRedisKey($key = '')
+	{
+		$key .= '*';
+		if (PhpRedis::command('KEYS', [$key])) {
+			/*删除redis*/
+			PhpRedis::command('DEL', [PhpRedis::command('KEYS', [$key])]);
+		}
+	}
+}

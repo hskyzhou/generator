@@ -1,0 +1,139 @@
+<?php 
+
+namespace DummyNamespace;
+
+/**
+ * Class DummyClass
+ *
+ * @package DummyNamespace
+ */
+Trait DummyClass
+{
+	/**
+	 * 搜索字段
+	 * @param  array  $fields [description]
+	 * @return [type]         [description]
+	 */
+	public function selectField($fields=['*'])
+    {
+        $this->model = $this->model->select($fields);
+
+        return $this;
+    }
+
+	/**
+     * 列表数据
+     * @return [type] [description]
+     */
+    public function index($options = [], $per = 20, $isPaginate = true)
+    {
+        /*过滤查询*/
+        $this->filterOptions($options);
+
+        if ($isPaginate) {
+            $results = $this->model->paginate($per);
+        } else {
+            $results = $this->model->get();
+        }
+
+        $this->resetModel();
+
+        return $this->parserResult($results);
+    }
+
+    /**
+     * 过滤查询键值--- 设置$this->model
+     * @param  [type] $options [description]
+     * @return [type]          [description]
+     */
+    public function filterOptions($options)
+    {
+        if ($options) {
+            $this->model = $this->model->orWhere(function ($query) use ($options) {
+                foreach ($options as $field => $option) {
+                    /*重写的方法*/
+                    $method = 'eloquentFilter' . $field;
+
+                    if (method_exists(Self::class, $method)) {
+                        $query = $this->{$method}($option);
+                    } else {
+                        switch ($option[1]) {
+                            case '=' :
+                                $query = $query->where($field, $option[2]);
+                                break;
+                            case 'like' :
+                                $query = $query->where($field, 'like', "%{$option[2]}%");
+                                break;
+                            case 'in' :
+                                $query = $query->whereIn($field, $option[2]);
+                            default :
+                                break;
+                        }
+                    }
+                }
+
+                return $query;
+            });
+        }
+    }
+
+    /*包含删除数据*/
+    public function withTrashed()
+    {
+        $this->model = $this->model->withTrashed();
+
+        return $this;
+    }
+    
+    public function findByEncrypt($id, $columns = ['*'])
+    {
+        $id = $this->decodeId($id);
+
+        return $this->find($id, $columns);
+    }
+
+    /**
+     * Find data by multiple fields
+     *
+     * @param array $where
+     * @param array $columns
+     *
+     * @return mixed
+     */
+    public function findWhereFirst(array $where, $columns = ['*'])
+    {
+        $this->applyCriteria();
+        $this->applyScope();
+
+        $this->applyConditions($where);
+
+        if (!$results = $this->model->get($columns)->first()) {
+            throw new \Exception("查无数据", 2);
+        }
+
+        $this->resetModel();
+
+        return $this->parserResult($results);
+    }
+
+    public function deleteWhereIn($field, $where)
+    {
+
+        $deleted = $this->model->whereIn($field, $where)->delete();
+
+        $this->resetModel();
+
+        return $deleted;
+    }
+
+    public function incrementField($where, $field, $step = 1)
+    {
+        $this->applyConditions($where);
+        
+        $results = $this->model->increment($field, $step);
+
+        $this->resetModel();
+
+        return $results;
+    }
+}
