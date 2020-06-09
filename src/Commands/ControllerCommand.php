@@ -17,9 +17,12 @@ class ControllerCommand extends GeneratorCommand
      * @var string
      */
     protected $signature = 'hsky:controller 
-                                {name} 
-                                {--r|request= : 自定义request}
-                                {--s|service= : 自定义service}';
+                                {name : 不需要带Controller}
+                                {--skip-request : 不生成request}
+                                {--skip-service : 不生成service}
+                                {--sn|serviceName : 自定义service的名称,不需要带Service}
+                                {--rn|requestName : 自定义request的名称,不需要带Request}
+                            ';
 
     /**
      * The console command description.
@@ -38,26 +41,26 @@ class ControllerCommand extends GeneratorCommand
     protected function buildClass($name) {
         $replace = [];
 
-        if ($this->option('request')) {
-            $replace = $this->buildRequestReplacements($replace);
-        } else {
+        if ($this->option('skip-request')) {
             $replace = array_merge($replace, [
                 'DummyFullRequestClass' => '',
                 'DummyRequestClass' => '',
                 'DummyRequestVariable' => '',
                 'DummyDelimiter' => '',
             ]);
+        } else {
+            $replace = $this->buildRequestReplacements($replace);
         }
 
-        if ($this->option('service')) {
-            $replace = $this->buildServiceReplacements($replace);
-        } else {
+        if ($this->option('skip-service')) {
             $replace = array_merge($replace, [
                 'DummyFullServiceClass' => '',
                 'DummyServiceClass' => '',
                 'DummyServiceVariable' => '',
                 'DummyDelimiter' => '',
             ]);
+        } else {
+            $replace = $this->buildServiceReplacements($replace);
         }
 
         return str_replace(
@@ -66,20 +69,23 @@ class ControllerCommand extends GeneratorCommand
     }
 
     protected function buildRequestReplacements($replace) {
-        $request = $this->option('request');
+        $request = $this->option('requestName') ? $this->option('requestName') : $this->argument('name');
+
+        $request = $request . 'Request';
 
         $requestClass = $this->parseRequest($request);
 
         if (!class_exists($requestClass)) {
-            if ($this->confirm("A {$requestClass} request does not exist. Do you want to generate it?", true)) {
+            // if ($this->confirm("A {$requestClass} request does not exist. Do you want to generate it?", true)) {
                 $this->call("make:request", ['name' => $requestClass]);
-            }
+            // }
         }
 
         return array_merge($replace, [
             'DummyFullRequestClass' => 'use ' . $requestClass . ';',
             'DummyRequestClass' => class_basename($requestClass),
-            'DummyRequestVariable' => '$' . lcfirst(class_basename($requestClass))
+            'DummyRequestVariable' => '$' . lcfirst(class_basename($requestClass)),
+            'DummyDelimiter' => ',',
         ]);
     }
 
@@ -104,20 +110,26 @@ class ControllerCommand extends GeneratorCommand
     }
 
     protected function buildServiceReplacements($replace) {
-        $service = $this->option('service');
+
+        $service = $this->option('serviceName') ? $this->option('serviceName') : basename(dirname($this->argument('name')));
+        $service = $service;
 
         $serviceClass = $this->parseService($service);
 
+        // dd($serviceClass);
         if (!class_exists($serviceClass)) {
-            if ($this->confirm("A {$serviceClass} service does not exist. Do you want to generate it?", true)) {
+            // if ($this->confirm("A {$serviceClass} service does not exist. Do you want to generate it?", true)) {
                 $this->call("hsky:service", ['name' => $serviceClass]);
-            }
+            // }
         }
+
+        $serviceClass = $serviceClass . 'Service';
 
         return array_merge($replace, [
             'DummyFullServiceClass' => 'use ' . $serviceClass . ';',
             'DummyServiceClass' => class_basename($serviceClass),
-            'DummyServiceVariable' => '$' . lcfirst(class_basename($serviceClass))
+            'DummyServiceVariable' => '$' . lcfirst(class_basename($serviceClass)),
+            'DummyDelimiter' => ',',
         ]);
     }
 
@@ -150,5 +162,15 @@ class ControllerCommand extends GeneratorCommand
     protected function getDefaultNamespace($rootNamespace)
     {
         return $rootNamespace.'\Http\Controllers';
+    }
+
+    /**
+     * Get the desired class name from the input.
+     *
+     * @return string
+     */
+    protected function getNameInput()
+    {
+        return trim($this->argument('name') . 'Controller');
     }
 }

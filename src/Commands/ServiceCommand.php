@@ -16,13 +16,10 @@ class ServiceCommand extends GeneratorCommand
      */
     protected $signature = 'hsky:service
                                 {name}
-                                {--model= : model名称}
-                                {--exception : 是否生成exception，并且生成create,update,delete异常，目前通过--module设置.}
-                                {--module= : exception的模块.}
-                                {--skip-migration= : 设置model情况，不生成migration}
-                                {--skip-model= : 设置model情况，不生成model}
-                                {--skip-model= : 设置model情况，不生成model}
-                                {--skip-exception= : 不生成Exception}
+                                {--m|model= : model名称}
+                                {--skip-migration : 设置model情况，不生成migration}
+                                {--skip-model : 设置model情况，不生成model}
+                                {--skip-exception : 不生成Exception}
                                 {--skip-all= : 只生成service本身}
                             ';
 
@@ -47,12 +44,12 @@ class ServiceCommand extends GeneratorCommand
     {
         // 屏蔽其余生成文件
         if ($this->option('skip-all')) {
-            $this->setOption('skip-model', true);
-            $this->setOption('skip-migration', true);
-            $this->setOption('skip-exception', true);
+            $this->input->setOption('skip-model', true);
+            $this->input->setOption('skip-migration', true);
+            $this->input->setOption('skip-exception', true);
         }
 
-        if ($this->option('model')) {
+        if (!$this->option('skip-model')) {
             // 验证是否安装有repository
             if (!config('repository')) {
                 $this->error("请先安装l5repositoory; composer require prettus/l5-repository");
@@ -65,15 +62,9 @@ class ServiceCommand extends GeneratorCommand
 
     protected function buildClass($name)
     {
-        if (!$this->option('model')) {
-            if ($this->confirm("是否需要生成对应的model,migration,repository", true)) {
-                $this->input->setOption('model', $this->ask('输入对应的model'));
-            }
-        }
-
-        if (!$this->option('exception')) {
-            if ($this->confirm("是否设置exception", true)) {
-                $this->input->setOption('exception', true);
+        if (!$this->option('skip-model')) {
+            if (!$this->option('model') && $model = $this->ask('输入repository对应的model')) {
+                $this->input->setOption('model', $model);
             }
         }
 
@@ -100,7 +91,7 @@ class ServiceCommand extends GeneratorCommand
 
         }
 
-        if ($this->option('exception')) {
+        if (!$this->option('skip-exception')) {
             $replace = $this->buildExceptionReplacements($replace);
         }
 
@@ -146,23 +137,19 @@ class ServiceCommand extends GeneratorCommand
 
     protected function buildExceptionReplacements($replace)
     {
-        $module = $this->option('module');
+        $module = basename(str_replace('\\', '/', $this->argument('name')));
 
-        if (!$module) {
-            if ($this->confirm("你需要设置exception的目录吗", true)) {
-                $module = $this->ask("请输入exception目录名称");
-            }
-        }
         $names = [
-            'CreateFailException',
-            'UpdateFailException',
-            'DeleteFailException',
+            'CreateFail',
+            'UpdateFail',
+            'DeleteFail',
         ];
 
-        $namespace = $module ? 'App\\Exceptions\\' . $module . '\\' : 'App\\Exceptions\\';
+        $namespace = 'App\\Exceptions\\' . $module . '\\';
 
         foreach ($names as $name) {
-            $exceptionName = $module ? $module . '/' . $name : $name;
+            $exceptionName = $module . '/' . $name;
+
             $this->call('hsky:exception', [
                 'name' => $exceptionName, 
                 '--code' => str_replace('Exception', 'Code', $name),
@@ -187,5 +174,15 @@ class ServiceCommand extends GeneratorCommand
     protected function getDefaultNamespace($rootNamespace)
     {
         return $rootNamespace.'\Services';
+    }
+
+    /**
+     * Get the desired class name from the input.
+     *
+     * @return string
+     */
+    protected function getNameInput()
+    {
+        return trim($this->argument('name') . 'Service');
     }
 }
