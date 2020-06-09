@@ -1,0 +1,26 @@
+<?php 
+
+namespace DummyNamespace;
+
+use App\Http\Controllers\Controller;
+DummyFullRequestClass
+DummyFullServiceClass
+
+/**
+ * Class DummyClass
+ *
+ * @package DummyNamespace
+ */
+Class DummyClass extends Controller
+{
+	/**
+     * Handle the incoming request.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return \Illuminate\Http\Response
+     */
+	public function __invoke(DummyRequestClass DummyRequestVariable DummyDelimiter DummyServiceClass DummyServiceVariable)
+	{
+		
+	}
+}

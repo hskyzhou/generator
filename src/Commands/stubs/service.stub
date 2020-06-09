@@ -2,19 +2,17 @@
 
 namespace DummyNamespace;
 
-use App\Services\Service;
 use Exception;
-use DB;
-use App\Traits\ResultTrait;
-use App\Traits\ServiceTrait;
-use App\Traits\SearchTrait;
 
 /**
  * Class DummyClass.
  *
  * @package DummyNamespace
  */
-class DummyClass extends Service
+class DummyClass
 {
-	use ServiceTrait, ResultTrait, SearchTrait;
+	public function __construct()
+	{
+
+	}
 }

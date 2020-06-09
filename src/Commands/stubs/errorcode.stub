@@ -1,0 +1,49 @@
+<?php
+
+namespace App\Exceptions;
+
+
+class ErrorCode
+{
+    /**
+     * @Message("登录失败！")
+     */
+    const LOGIN_ERROR = '密码错误';
+    const LOGIN_CODE = 403;
+
+    /**
+     * 未登录
+     */
+    const NOT_LOGIN_ERROR = '未登录';
+    const NOT_LOGIN_CODE = 401;
+
+    /**
+     * 没有权限
+     */
+    const NOT_HAS_PERMISSION_MESSAGE = '权限不够';
+    const NOT_HAS_PERMISSION_CODE = 403;
+
+    /**
+     * @Message("Server Error！")
+     */
+    const SERVER_ERROR = '系统错误';
+    const SERVER_CODE = 500;
+
+    /**
+     * 保存错误
+     */
+    const CREATE_FAIL_CODE = '1001';
+    const CREATE_FAIL_MESSAGE = '保存出错';
+
+    /**
+     * 修改错误
+     */
+    const UPDATE_FAIL_CODE = '1002';
+    const UPDATE_FAIL_MESSAGE = '修改出错';
+
+    /**
+     * 删除错误
+     */
+    const DELETE_FAIL_CODE = '1003';
+    const DELETE_FAIL_MESSAGE = '删除出错';
+}

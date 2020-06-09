@@ -1,0 +1,77 @@
+<?php 
+
+namespace DummyNamespace;
+
+use Exception;
+use DummyFullInterfaceClass;
+use DummyFullCreateFailException;
+use DummyFullUpdateFailException;
+use DummyFullDeleteFailException;
+
+/**
+ * Class DummyClass.
+ *
+ * @package DummyNamespace
+ */
+class DummyClass
+{
+	protected $DummpyRepositoryVariable;
+
+	public function __construct(DummyInterfaceClass $DummpyRepositoryVariable)
+	{
+		$this->DummpyRepositoryVariable = $DummpyRepositoryVariable;
+	}
+
+	/**
+	 * 增加数据
+	 * @return [type] [description]
+	 */
+	public function create($data)
+	{
+		if (!$info = $this->DummpyRepositoryVariable->create($data)) {
+            throw new  DummyCreateFailException();
+        }
+
+        // event();
+
+        return $info;
+	}
+
+	/**
+	 * 修改数据
+	 * @return [type] [description]
+	 */
+	public function update($data, $id)
+	{
+		try {
+            if (!$info = $this->DummpyRepositoryVariable->update($data, $id)) {
+                throw new  DummyUpdateFailException();
+            }
+        } catch (\Exception $e) {
+            throw new  DummyUpdateFailException();
+        }
+
+        // event();
+
+        return $info;
+	}
+
+	/**
+	 * 删除
+	 * @return [type] [description]
+	 */
+	public function delete()
+	{
+		try {
+            if (!$this->DummpyRepositoryVariable->delete($id)) {
+                throw new  DummyDeleteFailException();
+            }
+        } catch (\Exception $e) {
+            throw new  DummyDeleteFailException();
+        }
+
+		// event();
+
+		return true;
+	}
+}

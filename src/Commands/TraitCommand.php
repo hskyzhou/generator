@@ -53,11 +53,11 @@ class TraitCommand extends GeneratorCommand
 
     public function getNameInput()
     {
-        return config('hskygenerator.path.traits') . '/' . $this->argument('name');
+        return 'App/Traits/' . $this->argument('name');
     }
 
     public function getServiceNameInput($service)
     {
-        return config('hskygenerator.path.services') . '/' . $service;
+        return 'App/Services/' . $service;
     }
 }

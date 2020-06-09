@@ -1,0 +1,18 @@
+<?php 
+
+namespace DummyNamespace;
+
+use Exception;
+use App\Exceptions\ErrorCode;
+
+/**
+ * Class DummyClass.
+ *
+ * @package DummyNamespace
+ */
+class DummyClass extends Exception
+{
+	protected $code = ErrorCode::DummyCode;
+
+    protected $message = ErrorCode::DummyMessage;
+}
