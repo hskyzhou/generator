@@ -151,14 +151,12 @@ class ServiceCommand extends GeneratorCommand
             $exceptionName = $module . '/' . $name;
 
             $this->call('hsky:exception', [
-                'name' => $exceptionName, 
-                '--code' => str_replace('Exception', 'Code', $name),
-                '--message' => str_replace('Exception', 'Message', $name),
+                'name' => $exceptionName
             ]);
 
             $replace = array_merge($replace, [
-                'DummyFull'.$name => $namespace . $name . ' as ' . ucfirst($module . $name),
-                'Dummy'.$name => ucfirst($module . $name),
+                'DummyFull'.$name => $namespace . $name . ' as ' . ucfirst($module . $name) . 'Exception',
+                'Dummy'.$name => ucfirst($module . $name) . 'Exception',
             ]);
         }
 

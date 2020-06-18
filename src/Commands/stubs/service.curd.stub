@@ -60,7 +60,7 @@ class DummyClass
 	 * 删除
 	 * @return [type] [description]
 	 */
-	public function delete()
+	public function delete($id)
 	{
 		try {
             if (!$this->DummpyRepositoryVariable->delete($id)) {

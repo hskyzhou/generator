@@ -20,8 +20,8 @@ class ControllerCommand extends GeneratorCommand
                                 {name : 不需要带Controller}
                                 {--skip-request : 不生成request}
                                 {--skip-service : 不生成service}
-                                {--sn|serviceName : 自定义service的名称,不需要带Service}
-                                {--rn|requestName : 自定义request的名称,不需要带Request}
+                                {--sn|serviceName= : 自定义service的名称,不需要带Service}
+                                {--rn|requestName= : 自定义request的名称,不需要带Request}
                             ';
 
     /**
