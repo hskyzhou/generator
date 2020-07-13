@@ -155,7 +155,7 @@ class ServiceCommand extends GeneratorCommand
             ]);
 
             $replace = array_merge($replace, [
-                'DummyFull'.$name => $namespace . $name . ' as ' . ucfirst($module . $name) . 'Exception',
+                'DummyFull'.$name => $namespace . $name . 'Exception' . ' as ' . ucfirst($module . $name) . 'Exception',
                 'Dummy'.$name => ucfirst($module . $name) . 'Exception',
             ]);
         }
